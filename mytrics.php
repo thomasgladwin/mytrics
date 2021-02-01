@@ -1,14 +1,20 @@
-<html>
+<?php require($_SERVER['DOCUMENT_ROOT'].'/header.inc'); ?>
+<?php require($_SERVER['DOCUMENT_ROOT'].'/menu.inc'); ?>
+
+<div class="content">
+<h1>Mytrics</h1>
 <?php
+	# https://www.tegladwin.com/Misc/2021_01_27_Scopus/mytrics.php?auid=12763755600
 	
-	$apikey = "XXX"; // Fill in your Scopus API here
-	$orcid = 0;
-	$auid = 0;
+	$apikey = "xxx";
+	$orcid = 0; // "0000-0001-9538-6425";
+	//$auid = "12763755600";
+	$auid = 0; // $_GET["auid"];
 ?>
 <body>
 <p>Credit to the <a href="https://dev.elsevier.com/">Scopus API</a>.</p>
-<p>Usage: Enter a Scopus author ID or an ORCID in the corresponding box and click the button to retrieve metrics. <a href="https://libguides.lb.polyu.edu.hk/research_visibility/scopusid#s-lib-ctab-21088753-1">How to find your Scopus author ID</a> (make sure you're signed in with sufficient authorization to see it, and not just the default ORCID). Some citation metrics only consider papers published at least a year ago.</p>
-<p>The output includes the h-factor and a variant I called the H5, which is the h-factor for papers published within the last 5 years. The H5 seems potentially useful as a window on more recent work, as opposed to the standard h-factor that can only increase over time. This might allow more relevant comparisons / better incentives in certain contexts, although all use of such metrics requires careful thought and caution to make sure they're used for good (but of course - so does not using metrics, and metrics do seem to me to inherently let themselves be relatively transparently analyzed and criticized). Generally, I'd say that it's clear that h-factors and similar metrics can be gamed, so in the first instance I'd say they're mainly an upper bound of influence; but used honestly and fairly I think they can be helpful, e.g., in identifying where work may not be being picked up.</p>
+<p>Usage: Enter a Scopus author ID or an ORCID in the corresponding box and click the button to retrieve metrics. <a href="https://libguides.lb.polyu.edu.hk/research_visibility/scopusid#s-lib-ctab-21088753-1">How to find your Scopus author ID</a> (make sure you're signed in with sufficient authorization to see it, and not just the default ORCID). For citations-per-year descriptives I only included papers published at least a year ago.</p>
+<p>The output includes the h-factor and a variant I called the H5, which is the h-factor for papers published within the last 5 years. The H5 seems potentially useful as a window on more recent work, as opposed to the standard h-factor that can only increase over time. This might allow more relevant comparisons / better incentives in certain contexts, although all use of such metrics requires careful thought and caution to make sure they're used for good (but of course - so does not using metrics, and metrics do seem to me to inherently let themselves be relatively transparently analyzed and criticized). Generally, I'd say that it's clear that h-factors and similar metrics can be gamed or otherwise influenced in ways that make comparisons and interpretation complex, so in the first instance I'd say they're mainly an upper bound of influence. Even with that in mind, it's often difficult to attribute metrics to an individual's personal contributions in the context of co-authorship cultures. And beyond that, there's the fundamental question of which qualities or features are likely to be related to citation metrics - are those necessarily all the good ones? Nevertheless, when used honestly and fairly I think metrics can be helpful, e.g., in identifying where work may not be being picked up, at the level of particular groups or of particular types of paper.</p>
 
 <form id = "IntroForm" action = "mytrics.php" method = "get">
 	<p><textarea rows="2" name="auid"></textarea>
@@ -48,7 +54,8 @@
 			array_push($GLOBALS["memory0"]["title"], $item);
 		}
 	}
-
+	
+	//echo '<object height="50" data="https://api.elsevier.com/content/abstract/citation-count?doi=10.1016/S0014-5793(01)03313-0&httpAccept=text/html&apiKey='.$apikey.'"></object>';
 
 	$GLOBALS["memory0"]["NThisStep"] = 1;
 	$step0 = 0;
@@ -173,7 +180,7 @@
 	
 	// Median papers per year
 	$NPPY = $N_Papers_5/5;
-	echo "<p>Median published papers per year = ".$NPPY."</p>";
+	echo "<p>Median published papers per year (over the last five years) = ".$NPPY."</p>";
 
 	// Prognosis
 	$yearsAhead = 10;
@@ -264,6 +271,6 @@
 		}
 	}	
 ?>
-
+</div>
 </body>
 </html>
