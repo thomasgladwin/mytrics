@@ -8,6 +8,7 @@
 <body>
 <p>Credit to the <a href="https://dev.elsevier.com/">Scopus API</a>.</p>
 <p>Usage: Enter a Scopus author ID or an ORCID in the corresponding box and click the button to retrieve metrics. <a href="https://libguides.lb.polyu.edu.hk/research_visibility/scopusid#s-lib-ctab-21088753-1">How to find your Scopus author ID</a> (make sure you're signed in with sufficient authorization to see it, and not just the default ORCID). Some citation metrics only consider papers published at least a year ago.</p>
+<p>The output includes the h-factor and a variant I called the H5, which is the h-factor for papers published within the last 5 years. The H5 seems potentially useful as a window on more recent work, as opposed to the standard h-factor that can only increase over time. This might allow more relevant comparisons / better incentives in certain contexts, although all use of such metrics requires careful thought and caution (but of course - so does not using metrics, and metrics do seem to me to inherently let themselves be relatively transparently analyzed and criticized). Generally, I'd say that it's clear that h-factors and similar metrics can be gamed, so in the first instance I'd they're a lower bound of influence; but used honestly and fairly I think they can be helpful, e.g., in identifying where work may not be being picked up.</p>
 
 <form id = "IntroForm" action = "mytrics.php" method = "get">
 	<p><textarea rows="2" name="auid"></textarea>
