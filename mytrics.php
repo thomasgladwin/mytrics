@@ -7,13 +7,14 @@
 	# https://www.tegladwin.com/Misc/2021_01_27_Scopus/mytrics.php?auid=12763755600
 	
 	$apikey = "xxx";
-	$orcid = 0; // "0000-0001-9538-6425";
-	//$auid = "12763755600";
-	$auid = 0; // $_GET["auid"];
+	$orcid = ""; // "0000-0001-9538-6425"
+	$auid = "";  // "12763755600"
+	$query = ""; // KEY%28cat+AND+dog+AND+NOT+rodent+OR+mouse%29
 ?>
 <body>
 <p>Credit to the <a href="https://dev.elsevier.com/">Scopus API</a>.</p>
-<p>Usage: Enter a Scopus author ID or an ORCID in the corresponding box and click the button to retrieve metrics. <a href="https://libguides.lb.polyu.edu.hk/research_visibility/scopusid#s-lib-ctab-21088753-1">How to find your Scopus author ID</a> (make sure you're signed in with sufficient authorization to see it, and not just the default ORCID). For citations-per-year descriptives I only included papers published at least a year ago.</p>
+<p>Usage: Enter a Scopus author ID or an ORCID in the corresponding box and click the button to retrieve metrics. <a href="https://libguides.lb.polyu.edu.hk/research_visibility/scopusid#s-lib-ctab-21088753-1">How to find your Scopus author ID</a> (make sure you're signed in with sufficient authorization to see it, and not just the default ORCID). For entering a direct query, see:  http://schema.elsevier.com/dtds/document/bkapi/search/SCOPUSSearchTips.htm; e.g., KEY%28cat+AND+dog+AND+NOT+rodent+OR+mouse%29. 
+<p>Note: For citations-per-year descriptives I only included papers published at least a year ago.</p>
 <p>The output includes the h-factor and a variant I called the H5, which is the h-factor for papers published within the last 5 years. The H5 seems potentially useful as a window on more recent work, as opposed to the standard h-factor that can only increase over time. This might allow more relevant comparisons / better incentives in certain contexts, although all use of such metrics requires careful thought and caution to make sure they're used for good (but of course - so does not using metrics, and metrics do seem to me to inherently let themselves be relatively transparently analyzed and criticized). Generally, I'd say that it's clear that h-factors and similar metrics can be gamed or otherwise influenced in ways that make comparisons and interpretation complex, so in the first instance I'd say they're mainly an upper bound of influence. Even with that in mind, it's often difficult to attribute metrics to an individual's personal contributions in the context of co-authorship cultures. And beyond that, there's the fundamental question of which qualities or features are likely to be related to citation metrics - are those necessarily all the good ones? Nevertheless, when used honestly and fairly I think metrics can be helpful, e.g., in identifying where work may not be being picked up, at the level of particular groups or of particular types of paper.</p>
 
 <form id = "IntroForm" action = "mytrics.php" method = "get">
@@ -26,12 +27,20 @@
 	<input type="submit" value="Use ORCID">
 </form>
 
+<form id = "IntroForm" action = "mytrics.php" method = "get">
+	<p><textarea rows="2" name="query"></textarea>
+	<input type="submit" value="Use direct query">
+</form>
+
 <?php
 	if (isset($_GET["auid"])) {
 		$auid = $_GET["auid"];
 	} elseif (isset($_GET["orcid"])) {
 		$orcid = $_GET["orcid"];
 		$orcid = "".str_replace("-", "", $orcid);
+	} elseif (isset($_GET["query"])) {
+		$query = $_GET["query"];
+		//$query = "".str_replace("-", "", $query);
 	}
 
 	$GLOBALS["memory0"]["citedby-count"] = array();	
@@ -68,10 +77,12 @@
 		
 		//echo "<p>Step ".$step0.", start = ".$start0.", safetyCount = ".$safetyCount."</p>";
 		
-		if ($auid != 0) {
+		if (!empty($auid)) {
 			$url = "https://api.elsevier.com/content/search/scopus?query=AU-ID(".$auid.")&start=".$start0."&field=citedby-count,prism:coverDate,dc:title&apikey=4ea474635332968b121ff20370242883";
-		} elseif ($orcid != 0) {
+		} elseif (!empty($orcid)) {
 			$url = "https://api.elsevier.com/content/search/scopus?query=ORCID(".$orcid.")&start=".$start0."&field=citedby-count,prism:coverDate,dc:title&apikey=4ea474635332968b121ff20370242883";
+		} elseif (!empty($query)) {
+			$url = "https://api.elsevier.com/content/search/scopus?query=".$query."&start=".$start0."&field=citedby-count,prism:coverDate,dc:title&apikey=4ea474635332968b121ff20370242883";
 		} else {
 			echo '<p>Provide your ID to get results.</p>';
 			die();
@@ -112,7 +123,9 @@
 		$pub_age = date_create("now")->getTimestamp() - date_create($GLOBALS["memory0"]["prism:coverDate"][$n])->getTimestamp();
 		$pub_age = $pub_age/(365*24*60*60);
 		$pub_age = round($pub_age, 2);
-		
+		if ($pub_age < 1/12) {
+			$pub_age = 1/12;
+		}
 		$citeHist[$cc] = $citeHist[$cc] + 1;
 		array_push($ccPerYear, $cc/$pub_age);
 		if ($pub_age > 1) {
@@ -184,10 +197,7 @@
 
 	// Prognosis
 	$yearsAhead = 10;
-	$max_cc_global = 1000;
-	if ($max_cc_global < $max_cc) {
-		$max_cc_global = $max_cc;
-	}
+	$max_cc_global = $max_cc + $yearsAhead*$topQ*$NPPY + 100;
 	echo "<p>Predicted h-factor (with simulated new pubs) in:</p>";
 	for ($yr = 1; $yr < $yearsAhead; $yr++) {
 		$h = 0;
